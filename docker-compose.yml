@@ -1,0 +1,66 @@
+version: '3.1'
+
+services:
+  joomla:
+    depends_on:
+      - joomladb
+    image: joomla
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      JOOMLA_DB_HOST: joomladb:3306
+      JOOMLA_DB_USER: joomla
+      JOOMLA_DB_PASSWORD: joomla
+
+  joomladb:
+    image: mysql:latest
+    volumes:
+      - joomladb_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: sctijoomla
+      MYSQL_DATABASE: joomla
+      MYSQL_USER: joomla
+      MYSQL_PASSWORD: joomla
+
+  db:
+    image: mysql:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: sctiwordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    links:
+      - db:mysql
+      - joomladb:mysql
+    ports:
+      - "8090:80"
+    restart: always
+    environment:
+      - PMA_HOST = db:mysql
+      - PMA_HOST = joomladb:mysql
+
+volumes:
+    db_data:
+    joomladb_data:
+    
+    
